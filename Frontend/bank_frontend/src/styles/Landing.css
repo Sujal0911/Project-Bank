@@ -1,0 +1,163 @@
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 64px;
+  justify-content: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #000;
+  border-radius: 2px;
+}
+
+.logo svg {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) invert(1);
+}
+
+.bank-name {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #000;
+}
+
+.content-section {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.headline {
+  font-size: 56px;
+  font-weight: 300;
+  color: #000;
+  margin-bottom: 24px;
+  line-height: 1.1;
+  letter-spacing: -1px;
+}
+
+.description {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #666;
+  max-width: 480px;
+  margin: 0 auto;
+  font-weight: 400;
+}
+
+.button-section {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 12px 28px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 2px;
+  letter-spacing: 0.3px;
+  text-align: center;
+  display: inline-block;
+  text-transform: uppercase;
+  border: 1px solid #000;
+  min-width: 140px;
+}
+
+.btn-primary {
+  background: #000;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #222;
+  border-color: #222;
+  opacity: 0.9;
+}
+
+.btn-primary:active {
+  opacity: 0.8;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #000;
+  border: 1px solid #000;
+}
+
+.btn-secondary:hover {
+  background: #f5f5f5;
+  opacity: 0.9;
+}
+
+.btn-secondary:active {
+  opacity: 0.8;
+}
+
+.demo-link {
+  text-align: center;
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.subtle-link {
+  font-size: 14px;
+  font-weight: 500;
+  color: #999;
+  transition: color 0.2s ease;
+  letter-spacing: 0.2px;
+}
+
+.subtle-link:hover {
+  color: #000;
+}
+
+@media (max-width: 640px) {
+  .logo-section {
+    margin-bottom: 48px;
+  }
+
+  .headline {
+    font-size: 40px;
+    margin-bottom: 20px;
+    letter-spacing: -0.5px;
+  }
+
+  .description {
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .content-section {
+    margin-bottom: 48px;
+  }
+
+  .button-section {
+    gap: 8px;
+  }
+
+  .btn {
+    padding: 11px 24px;
+    font-size: 13px;
+    min-width: 130px;
+  }
+
+  .demo-link {
+    margin-top: 36px;
+    padding-top: 24px;
+  }
+
+  .subtle-link {
+    font-size: 13px;
+  }
+}

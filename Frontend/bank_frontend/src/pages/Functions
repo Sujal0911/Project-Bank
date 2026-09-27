@@ -1,0 +1,317 @@
+import { useEffect, useState } from 'react'
+import Header from '../components/Header'
+import '../styles/DepositWithdraw.css'
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL
+
+function DepositWithdraw() {
+  const [activeTab, setActiveTab] = useState('deposit')
+  const [amount, setAmount] = useState('')
+  const [description, setDescription] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState('')
+  const [showConfirm, setShowConfirm] = useState(false)
+  const user = JSON.parse(localStorage.getItem('user'))
+  const credentials = localStorage.getItem('credentials')
+
+  const balance = user.balance
+
+  const handleAmountChange = (e) => {
+    const value = e.target.value
+    if (value === '' || /^\d*\.?\d{0,2}$/.test(value)) {
+      setAmount(value)
+      setError('')
+    }
+  }
+
+  const validateForm = () => {
+    if (!amount || parseFloat(amount) <= 0) {
+      setError('Please enter a valid amount')
+      return false
+    }
+    if (parseFloat(amount) > balance && activeTab === 'withdraw') {
+      setError('Insufficient balance')
+      return false
+    }
+    if (parseFloat(amount) > 50000) {
+      setError('Amount exceeds transaction limit')
+      return false
+    }
+    return true
+  }
+
+  const handleSubmitClick = () => {
+    if (validateForm()) {
+      setShowConfirm(true)
+    }
+  }
+
+  const handleDeposit = async () => {
+    setShowConfirm(false)
+    setLoading(true)
+    
+    // Simulate API call
+    const credentials = localStorage.getItem('credentials')
+    const response = await fetch(`${backendUrl}/accounts/deposit/${amount}`, 
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Basic ${credentials}`,
+        }
+      }
+    )
+    
+    setLoading(false)
+    setSubmitted(true)
+    setAmount('')
+    setDescription('')
+    
+    // Reset after 3 seconds
+    setTimeout(() => {
+      setSubmitted(false)
+    }, 3000)
+  }
+
+    const handleWithdraw = async () => {
+    setShowConfirm(false)
+    setLoading(true)
+    
+    // Simulate API call
+    const credentials = localStorage.getItem('credentials')
+    const response = await fetch(`${backendUrl}/accounts/withdraw/${amount}`, 
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Basic ${credentials}`,
+        }
+      }
+    )
+
+    alert(response.text());
+    
+    setLoading(false)
+    setSubmitted(true)
+    setAmount('')
+    setDescription('')
+    
+    // Reset after 3 seconds
+    setTimeout(() => {
+      setSubmitted(false)
+    }, 3000)
+  }
+
+    useEffect(() => {
+  const login = async () => {
+    const response = await fetch(`${backendUrl}/accounts/login`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Basic ${credentials}`,
+        'Content-Type': 'application/json',
+      },
+    })
+
+    const user = await response.json()
+    localStorage.setItem('user', JSON.stringify(user))
+  }
+
+  login()
+}, [handleDeposit])
+
+  const transactionAmount = amount ? parseFloat(amount) : 0
+  const finalBalance = activeTab === 'deposit' 
+    ? balance + transactionAmount 
+    : balance
+
+  return (
+    <div className="app-container">
+      <Header />
+      <div className="page-container transaction-container">
+        
+        {/* Tabs */}
+        <div className="tab-section">
+          <button
+            className={`tab ${activeTab === 'deposit' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('deposit')
+              setAmount('')
+              setDescription('')
+              setError('')
+              setSubmitted(false)
+            }}
+            disabled={loading}
+          >
+            Deposit
+          </button>
+          <button
+            className={`tab ${activeTab === 'withdraw' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('withdraw')
+              setAmount('')
+              setDescription('')
+              setError('')
+              setSubmitted(false)
+            }}
+            disabled={loading}
+          >
+            Withdraw
+          </button>
+        </div>
+
+        {submitted ? (
+          <div className="success-state">
+            <div className="success-icon">✓</div>
+            <h3 className="success-title">
+              {activeTab === 'deposit' ? 'Deposit confirmed' : 'Withdrawal confirmed'}
+            </h3>
+            <p className="success-message">
+              {activeTab === 'deposit'
+                ? 'Your deposit has been processed successfully.'
+                : 'Your withdrawal has been processed successfully.'}
+            </p>
+            <div className="success-details">
+              <div className="detail-row">
+                <span className="detail-label">Amount</span>
+                <span className="detail-value">${transactionAmount.toFixed(2)}</span>
+              </div>
+              {activeTab === 'withdraw' && (
+                <div className="detail-row">
+                  <span className="detail-label">Fee</span>
+                  <span className="detail-value">${processingFee.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="detail-row detail-total">
+                <span className="detail-label">New balance</span>
+                <span className="detail-value">${finalBalance.toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <form className="transaction-form" onSubmit={(e) => { e.preventDefault(); handleSubmitClick() }}>
+            
+            {/* Balance display */}
+            <div className="balance-card">
+              <div className="balance-label">Current balance</div>
+              <div className="balance-amount">${user.balance}</div>
+            </div>
+
+            {/* Amount input */}
+            <div className="form-group">
+              <label htmlFor="amount">
+                {activeTab === 'deposit' ? 'Deposit amount' : 'Withdrawal amount'}
+              </label>
+              <div className="amount-input-wrapper">
+                <span className="currency-symbol">$</span>
+                <input
+                  id="amount"
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="0.00"
+                  value={amount}
+                  onChange={handleAmountChange}
+                  disabled={loading}
+                  required
+                />
+              </div>
+              {error && <div className="error-message">{error}</div>}
+            </div>
+
+            {/* Description */}
+            <div className="form-group">
+              <label htmlFor="description">Description (optional)</label>
+              <input
+                id="description"
+                type="text"
+                placeholder={activeTab === 'deposit' ? 'e.g., Paycheck transfer' : 'e.g., Cash withdrawal'}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                disabled={loading}
+              />
+            </div>
+
+            {/* Transaction review */}
+            {amount && !error && (
+              <div className="review-section">
+                <div className="review-label">Transaction summary</div>
+                <div className="review-details">
+                  <div className="detail-row">
+                    <span className="detail-label">
+                      {activeTab === 'deposit' ? 'Deposit' : 'Withdrawal'}
+                    </span>
+                    <span className="detail-value">
+                      ${transactionAmount.toFixed(2)}
+                    </span>
+                  </div>
+                  {activeTab === 'withdraw' && (
+                    <div className="detail-row">
+                      {/* <span className="detail-label">Transaction fee</span> */}
+                      {/* <span className="detail-value">${processingFee.toFixed(2)}</span> */}
+                    </div>
+                  )}
+                  <div className="detail-row detail-separator">
+                    <span className="detail-label">
+                      {activeTab === 'deposit' ? 'New balance' : 'Amount received'}
+                    </span>
+                    <span className="detail-value">
+                      ${finalBalance.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Confirmation modal */}
+            {showConfirm && (
+              <div className="modal-overlay">
+                <div className="modal-content">
+                  <h4 className="modal-title">Confirm transaction</h4>
+                  <div className="modal-details">
+                    <p className="modal-text">
+                      {activeTab === 'deposit'
+                        ? `Deposit $${transactionAmount.toFixed(2)} to your account?`
+                        : `Withdraw $${transactionAmount.toFixed(2)} from your account?`}
+                    </p>
+                    {activeTab === 'withdraw' && (
+                      <p className="modal-fee">
+                        Transaction fee: ${processingFee.toFixed(2)}
+                      </p>
+                    )}
+                  </div>
+                  <div className="modal-buttons">
+                    <button
+                      type="button"
+                      className="btn btn-secondary modal-btn"
+                      onClick={() => setShowConfirm(false)}
+                      disabled={loading}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary modal-btn"
+                      onClick={handleDeposit}
+                      disabled={loading}
+                    >
+                      {loading ? 'Processing...' : 'Confirm'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Submit button */}
+            <button
+              type="submit"
+              className="btn btn-primary btn-block"
+              disabled={!amount || error || loading}
+            >
+              {loading ? 'Processing...' : activeTab === 'deposit' ? 'Review Deposit' : 'Review Withdrawal'}
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export default DepositWithdraw
